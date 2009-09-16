@@ -1,0 +1,20 @@
+<html>
+    <head>
+        <title>${self.title()}</title>
+    </head>
+    <body>
+    <div>
+      <a href="/">Home</a>
+      <a href="/raters">Raters</a>
+      <a href="/test">Test</a>
+      <a href="/logout">Logout</a>
+    </div>
+
+    ${self.body()}
+
+    </body>
+</html>
+
+<%def name="title()">
+    Hello
+</%def>

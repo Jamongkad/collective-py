@@ -1,0 +1,6 @@
+<%inherit file="base.html" />
+<b>User movies</b>
+
+% for users in raters:
+    <p>${users.name} <a href="/movies/${users.id}">click to view ${users.name}'s movies.</a></p>
+% endfor

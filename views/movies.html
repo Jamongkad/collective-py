@@ -1,0 +1,17 @@
+<%inherit file="base.html" />
+<h3>
+    ${user}'s movies
+</h3>
+% if user_movies:
+    % for ratings, movies in user_movies:
+        <div>
+            <p>${movies.movie_name}</p> - ${ratings.rating}
+        </div>
+    % endfor
+% else:
+   <p>No movies</p>
+% endif
+
+<%def name="title()">
+    ${user} movies
+</%def>
