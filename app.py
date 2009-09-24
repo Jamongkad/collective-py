@@ -1,12 +1,16 @@
 import web
 
-from mako.template import Template
-from mako.lookup import TemplateLookup
 from movie import Raters, Movie, RatersPreference, Rating, UserRole, Role, db_session
 
 import form
 import formencode
 from formencode import htmlfill
+
+from view import render
+
+import algos
+
+from winput import winput_deco
 
 urls = (
     '/login', 'login',
@@ -16,6 +20,7 @@ urls = (
     '/add_movie', 'add_movie',
     '/raters', 'raters',
     '/movies/([0-9]+)', 'movies',
+    '/compare/([0-9]+)/([0-9]+)', 'compare',
     '/test', 'test'
 )
 
@@ -27,12 +32,6 @@ def session_hook():
     web.ctx.session = session
 
 app.add_processor(web.loadhook(session_hook))
-
-mylookup = TemplateLookup(directories=['./views'], output_encoding='utf-8', input_encoding='utf-8')
-
-def render(template, **kwa):
-    mytemplate = mylookup.get_template(template)
-    return mytemplate.render(**kwa)
 
 def protect(role=[]):
     def check_meth(meth):
@@ -55,31 +54,21 @@ class login:
     def GET(self):
         return render('auth.html')
 
+    @winput_deco(schema=form.LoginForm(), html='auth.html')
     def POST(self):
-        i = web.input()       
-        schema = form.LoginForm()
+        i = web.input()        
+        check = db_session.query(Raters, Role, UserRole)\
+                          .filter(Raters.name==i.username)\
+                          .filter(UserRole.rater_id==Raters.id)\
+                          .filter(UserRole.role_id==Role.id)\
+                          .first()
+        if check != None:
+            web.ctx.session.username = i.username
+            web.ctx.session.role = check.Role.role_name
+            web.ctx.session.loggedIn = True
+            return web.seeother('/dashboard')
 
-        try:
-            schema.to_python(dict(i))
-        except formencode.Invalid, error:
-            return htmlfill.render(
-                render('auth.html'),
-                defaults=error.value,
-                errors=error.error_dict
-            )             
-        else:
-            check = db_session.query(Raters, Role, UserRole)\
-                              .filter(Raters.name==i.username)\
-                              .filter(UserRole.rater_id==Raters.id)\
-                              .filter(UserRole.role_id==Role.id)\
-                              .first()
-            if check != None:
-                web.ctx.session.username = i.username
-                web.ctx.session.role = check.Role.role_name
-                web.ctx.session.loggedIn = True
-                return web.seeother('/dashboard')
-
-            return 'something went awry!'
+        return 'something went awry!'
 
 class logout():
     def GET(self):
@@ -87,10 +76,14 @@ class logout():
         return web.redirect('/login')
 
 class dashboard:
+ 
     @protect()
     def GET(self):
-        username = web.ctx.session.username
-        return render('dashboard.html', username=username)
+        return render('dashboard.html')
+    
+    @winput_deco(schema=form.DashboardForm(), html="dashboard.html")
+    def POST(self): 
+        return web.input()
 
 class index:
     @protect()
@@ -104,15 +97,26 @@ class raters:
         user_raters = db_session.query(Raters).all()
         return render('raters.html', raters=user_raters)
 
+def movie_prefs(person_id):
+    return db_session.query(Rating, Movie)\
+                     .filter(Rating.rater_id==person_id)\
+                     .filter(Rating.movie_id==Movie.id).all() 
+
 class movies:
     @protect()
     def GET(self, id):
         user = db_session.query(Raters).filter(Raters.id==id).first().name
-        user_movies = db_session.query(Rating, Movie)\
-                                .filter(Rating.rater_id==id)\
-                                .filter(Rating.movie_id==Movie.id).all()
+        user_movies = movie_prefs(id) 
         return render('movies.html', user_movies=user_movies, user=user)
 
+class compare:
+    def GET(self, person1, person2):
+        person_one = movie_prefs(person1) 
+        person_two = movie_prefs(person2)
+        values = algos.sim_pearson(person_one, person_two)
+
+        return render('compare.html', values=values)
+               
 class add_movie:
     def POST(self):
         i = web.input()

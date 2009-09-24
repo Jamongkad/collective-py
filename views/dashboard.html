@@ -1,2 +1,10 @@
 <%inherit file="base.html" />
-<h1>Welcome ${username}!</h1>
+<%
+    import web
+%>
+<h1>Welcome ${web.ctx.session.username}!</h1>
+
+<form action="/dashboard" method="post">
+    <p><input type="text" name="search" value="" /></p>
+    <p><input type="submit" value="submit" name="submit" /></p>
+</form>

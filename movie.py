@@ -77,7 +77,6 @@ class UserRole(Base):
         self.rater_id = rater_id
         self.role_id = role_id
 
-
 class Role(Base):
 
     __tablename__ = 'role'
