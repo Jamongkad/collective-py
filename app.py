@@ -10,7 +10,7 @@ from view import render
 
 import algos
 
-from winput import winput_deco
+from validation import validate
 
 urls = (
     '/login', 'login',
@@ -20,7 +20,7 @@ urls = (
     '/add_movie', 'add_movie',
     '/raters', 'raters',
     '/movies/([0-9]+)', 'movies',
-    '/compare/([0-9]+)/([0-9]+)', 'compare',
+    '/compare/([A-Za-z0-9]+)/([A-za-z0-9]+)', 'compare',
     '/test', 'test'
 )
 
@@ -54,7 +54,7 @@ class login:
     def GET(self):
         return render('auth.html')
 
-    @winput_deco(schema=form.LoginForm(), html='auth.html')
+    @validate(schema=form.LoginForm(), html='auth.html')
     def POST(self):
         i = web.input()        
         check = db_session.query(Raters, Role, UserRole)\
@@ -81,7 +81,7 @@ class dashboard:
     def GET(self):
         return render('dashboard.html')
     
-    @winput_deco(schema=form.DashboardForm(), html="dashboard.html")
+    @validate(schema=form.DashboardForm(), html="dashboard.html")
     def POST(self): 
         return web.input()
 
@@ -111,9 +111,9 @@ class movies:
 
 class compare:
     def GET(self, person1, person2):
-        person_one = movie_prefs(person1) 
-        person_two = movie_prefs(person2)
-        values = algos.sim_pearson(person_one, person_two)
+        person_one = person1 #movie_prefs(person1) 
+        person_two = person2 #movie_prefs(person2)
+        values = algos.mongo_sim_distance(person_one, person_two)
 
         return render('compare.html', values=values)
                

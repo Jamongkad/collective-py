@@ -4,7 +4,7 @@ from formencode import htmlfill
 
 from view import render
 
-def winput_deco(schema, html=None):
+def validate(schema, html=None):
     def class_meth(meth):
         def new(self, *args, **kwa):   
             try:

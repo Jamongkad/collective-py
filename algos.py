@@ -1,5 +1,8 @@
 from math import sqrt
 
+def mongo_sim_distance(person1, person2):
+    return person1, person2
+
 def sim_distance(person1, person2):
     si = []
     for rating, movie in person1:
