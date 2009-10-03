@@ -1,7 +1,20 @@
 from math import sqrt
 
-def mongo_sim_distance(person1, person2):
-    return person1, person2
+#ten times better algorithm
+def mongo_sim_distance(prefs, person1, person2):
+    si = [] 
+    for movie1 in prefs(person1):
+        if movie1 in prefs(person2):
+            si.append(1)
+        
+    n = len(si)
+    if n is 0: return 0
+
+    sum_of_squares = sum([pow(prefs(person1)[item] - prefs(person2)[item], 2) 
+                         for item in prefs(person1) if item in prefs(person2)])
+    
+    return 1/(1+sum_of_squares)
+        
 
 def sim_distance(person1, person2):
     si = []

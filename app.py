@@ -1,6 +1,7 @@
 import web
 
 from movie import Raters, Movie, RatersPreference, Rating, UserRole, Role, db_session
+from mongo_movie import collection
 
 import form
 import formencode
@@ -102,6 +103,9 @@ def movie_prefs(person_id):
                      .filter(Rating.rater_id==person_id)\
                      .filter(Rating.movie_id==Movie.id).all() 
 
+def mongo_movie_prefs(name):
+    return collection.scores.find_one({'name' : name.capitalize()})['prefs']
+
 class movies:
     @protect()
     def GET(self, id):
@@ -111,10 +115,7 @@ class movies:
 
 class compare:
     def GET(self, person1, person2):
-        person_one = person1 #movie_prefs(person1) 
-        person_two = person2 #movie_prefs(person2)
-        values = algos.mongo_sim_distance(person_one, person_two)
-
+        values = algos.mongo_sim_distance(mongo_movie_prefs, person1, person2)
         return render('compare.html', values=values)
                
 class add_movie:
