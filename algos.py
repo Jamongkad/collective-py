@@ -32,19 +32,27 @@ def sim_pearson(prefs, person1, person2):
     n = len(si)
     if n is 0: return 0
 
-    sum1 = sum([firstPerson[it] for it in si])
-    sum2 = sum([secondPerson[it] for it in si])
+    def square_minus(square, sum, n):
+        return square-pow(sum, 2)/n
+
+    def sum_person(person):
+        return sum([person[it] for it in si]) 
+
+    def pow_sum_person(person):
+        return sum([pow(person[it], 2) for it in si])
     
-    sum1Sq = sum([pow(firstPerson[it], 2) for it in si])
-    sum2Sq = sum([pow(secondPerson[it], 2) for it in si])
+    sum1 = sum_person(firstPerson) 
+    sum2 = sum_person(secondPerson)
+  
+    sum1Sq = pow_sum_person(firstPerson)
+    sum2Sq = pow_sum_person(secondPerson)
     
     pSum = sum([firstPerson[it] * secondPerson[it] for it in si])
 
     num = pSum - (sum1*sum2/n)
-    den = sqrt((sum1Sq-pow(sum1, 2)/n) * (sum2Sq-pow(sum2, 2)/n))
+    den = sqrt(square_minus(sum1Sq, sum1, n) * square_minus(sum2Sq, sum2, n))
     
     if den == 0: return 0
 
     r=num/den
-
     return r
