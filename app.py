@@ -115,7 +115,7 @@ class movies:
 
 class compare:
     def GET(self, person1, person2):
-        values = algos.mongo_sim_distance(mongo_movie_prefs, person1, person2)
+        values = algos.sim_pearson(mongo_movie_prefs, person1, person2)
         return render('compare.html', values=values)
                
 class add_movie:
